@@ -9,7 +9,7 @@ use Sub::Exporter -setup => {
     exports => [qw/tt strip/],
 };
 
-our $VERSION   = '0.00';
+our $VERSION   = '0.01';
 our $AUTHORITY = 'CPAN:JROCKWAY';
 
 my %SIGIL_MAP = (
