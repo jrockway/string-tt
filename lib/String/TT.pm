@@ -4,9 +4,13 @@ use warnings;
 use PadWalker qw(peek_my);
 use Carp qw(confess);
 use Template;
+use List::Util qw(min);
 use Sub::Exporter -setup => {
-    exports => ['tt'],
+    exports => [qw/tt strip/],
 };
+
+our $VERSION   = '0.00';
+our $AUTHORITY = 'CPAN:JROCKWAY';
 
 my %SIGIL_MAP = (
     '$' => 's',
@@ -53,6 +57,29 @@ sub tt($) {
     return $output;
 }
 
+sub strip($){
+    my $lines = shift;
+
+    my $trailing_newline = ($lines =~ /\n$/s);# perl silently throws away data
+    my @lines = split "\n", $lines;
+    shift @lines if $lines[0] eq ''; # strip empty leading line
+
+    # determine indentation level
+    my @spaces = map { /^(\040+)/ and length $1 or 0 } grep { !/^\s*$/ } @lines;
+    
+    my $indentation_level = min(@spaces);
+    
+    # strip off $indentation_level spaces
+    my $stripped = join "\n", map { 
+        my $copy = $_;
+        substr($copy,0,$indentation_level) = "";
+        $copy;
+    } @lines;
+    
+    $stripped .= "\n" if $trailing_newline;
+    return $stripped;
+}
+
 1;
 __END__
 
@@ -62,16 +89,23 @@ String::TT - use TT to interpolate lexical variables
 
 =head1 SYNOPSIS
 
-  use String::TT 'tt';
+  use String::TT qw/tt strip/;
 
   sub foo {
      my $self = shift;
      return tt 'my name is [% self.name %]!';
   }
 
+  sub bar {
+     my @args = @_;
+     return strip tt q{
+        Args: [% args_a.join(",") %]
+     }
+  }
+
 =head1 DESCRIPTION
 
-String::TT exports a 'tt' fucntion, which takes a TT
+String::TT exports a 'tt' function, which takes a TT
 (L<Template|Template> Toolkit) template as its argument.  It uses the
 current lexical scope to resolve variable references.  So if you say:
 
@@ -108,6 +142,44 @@ delete the array, though, then C<foo_a> will refer to the scalar.
 
 This is a very cornery case that you should never encounter unless you
 are weird.
+
+=head1 EXPORT
+
+None by default, but C<strip> and C<tt> are available.
+
+=head1 FUNCTIONS
+
+=head2 tt $template
+
+Treats C<$template> as a Template Toolkit template, populated with variables
+from the current lexical scope.
+
+=head2 strip $text
+
+Removes a leading empty line and common leading spaces on each line.
+For example,
+
+  strip q{
+    This is a test.
+     This is indented.
+  };
+
+Will yield the string C<"This is a test\n This is indented.\n">.
+
+Designed to be used like:
+
+  my $data = strip tt q{
+      This is a [% template %].
+      It is easy to read.
+  };
+
+Instead of the ugly heredoc equivalent:
+
+  my $data = tt <<'EOTT';
+This is a [% template %].
+It looks like crap.
+EOTT
+
 
 =head1 HACKING
 
