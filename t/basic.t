@@ -1,8 +1,9 @@
 use strict;
 use warnings;
-use Test::More tests => 7;
+use Test::More tests => 9;
 
 use String::TT qw/tt strip/;
+use utf8;
 
 is a(), 'foobar', 'foobar works';
 like b(), qr/SCALAR/, "references aren't dereferenced";
@@ -16,6 +17,8 @@ AuthName "quotes r us preview"
 AuthUserFile /path/to/whatever/.htpasswd
 Require user jrockway nothingmuch pergirin stevan
 HERE
+is utf_eight(), "ほげぼげ", 'utf8 works';
+is length utf_eight(), 4, 'utf8 works not by coincidence';
 
 sub a {
     my $foo = 'foo';
@@ -74,4 +77,9 @@ sub random_work_thing {
         AuthUserFile [% htpasswd_file %]
         Require user [% users.keys.sort.join(' ') %]
     };
+}
+
+sub utf_eight {
+    my $hoge = "ほげ";
+    return tt "[% hoge %]ぼげ";
 }
