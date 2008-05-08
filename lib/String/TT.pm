@@ -105,7 +105,7 @@ String::TT - use TT to interpolate lexical variables
 
 =head1 DESCRIPTION
 
-String::TT exports a 'tt' function, which takes a TT
+String::TT exports a C<tt> function, which takes a TT
 (L<Template|Template> Toolkit) template as its argument.  It uses the
 current lexical scope to resolve variable references.  So if you say:
 
@@ -118,8 +118,8 @@ the result will be C<< 42 <-> 24 >>.
 
 TT provides a slightly less rich namespace for variables than perl, so
 we have to do some mapping.  Arrays are always translated from
-C<@array> to C<array_a>, hashes are always translated from C<%hash> to
-C<hash_h>.  Scalars are special and retain their original name, but
+C<@array> to C<array_a> and hashes are always translated from C<%hash>
+to C<hash_h>.  Scalars are special and retain their original name, but
 they also get a C<scalar_s> alias.  Here's an example:
 
   my $scalar = 'scalar';
@@ -141,7 +141,7 @@ be generated.  You will have to access it via C<foo_a_s>.  If you
 delete the array, though, then C<foo_a> will refer to the scalar.
 
 This is a very cornery case that you should never encounter unless you
-are weird.
+are weird.  99% of the time you will just use the variable name.
 
 =head1 EXPORT
 
@@ -166,7 +166,7 @@ For example,
 
 Will yield the string C<"This is a test\n This is indented.\n">.
 
-Designed to be used like:
+This feature is designed to be used like:
 
   my $data = strip tt q{
       This is a [% template %].
