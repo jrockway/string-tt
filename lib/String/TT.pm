@@ -30,8 +30,8 @@ my %SIGIL_MAP = (
 sub tt($) {
     my $template = shift;
     confess 'Whoa there, I need a template' if !defined $template;
-
-    my %vars = %{peek_my(1)||{}};
+    my $frame = (caller(1))[0] eq 'DB' ? 3 : 1;
+    my %vars = %{peek_my($frame)||{}};
     my %transformed_vars;
     for my $v (keys %vars){
         my ($sigil, $varname) = ($v =~ /^(.)(.+)$/);
